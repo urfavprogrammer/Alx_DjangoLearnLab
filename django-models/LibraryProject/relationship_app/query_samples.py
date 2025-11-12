@@ -59,8 +59,8 @@ def librarian_for_library(library_id: int) -> Optional['Librarian']:
     from .models import Library
 
     try:
-        library = Library.objects.get(name=library_name)
-    except Library.DoesNotExist:
+        library = Librarian.objects.get(library=library_name)
+    except Librarian.DoesNotExist:
         return None
     # OneToOne relation is accessible via 'librarian' related name
     return getattr(library, 'librarian', None)
