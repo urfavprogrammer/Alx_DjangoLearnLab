@@ -1,4 +1,7 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import redirect
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 
@@ -29,3 +32,19 @@ class LibraryBooksView(ListView):
         library_pk = self.kwargs.get('pk')
         context['library'] = get_object_or_404(Library, pk=library_pk)
         return context
+
+def register(request):
+    """Simple user registration view using Django's UserCreationForm.
+
+    On successful registration the user is logged in and redirected to the
+    login redirect URL.
+    """
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('relationship_app:book-list')
+    else:
+        form = UserCreationForm()
+    return render(request, 'relationship_app/register.html', {'form': form})
