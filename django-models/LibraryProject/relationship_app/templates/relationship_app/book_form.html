@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ action }} Book</title>
+</head>
+<body>
+  <h1>{{ action }} Book</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{{ action }}</button>
+  </form>
+  <a href="{% url 'relationship_app:book-list' %}">Back to books</a>
+</body>
+</html>

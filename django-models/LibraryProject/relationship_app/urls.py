@@ -1,12 +1,13 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from books.views import list_books, LibraryDetailView
 
 app_name = 'relationship_app'
 
 urlpatterns = [
-    path('books/', views.list_books, name='book-list'),
-    path('libraries/<int:pk>/', views.LibraryBooksView.as_view(), name='library-detail'),
+    path('books/', list_books, name='book-list'),
+    path('libraries/<int:pk>/', LibraryDetailView.as_view(), name='library-detail'),
 
     # Authentication
     path('login/', auth_views.LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
