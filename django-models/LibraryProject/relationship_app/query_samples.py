@@ -48,7 +48,7 @@ def books_in_library(library_id: int) -> Iterable['Book']:
     from .models import Library
 
     try:
-        library = Library.objects.get(pk=library_id)
+        library = Library.objects.get(name=library_name)
     except Library.DoesNotExist:
         return []
     return library.books.all()
@@ -59,7 +59,7 @@ def librarian_for_library(library_id: int) -> Optional['Librarian']:
     from .models import Library
 
     try:
-        library = Library.objects.get(pk=library_id)
+        library = Library.objects.get(name=library_name)
     except Library.DoesNotExist:
         return None
     # OneToOne relation is accessible via 'librarian' related name
