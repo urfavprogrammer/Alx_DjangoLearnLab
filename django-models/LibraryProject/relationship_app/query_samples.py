@@ -37,7 +37,7 @@ def books_by_author(author_id: int) -> Iterable['Book']:
     from .models import Author
 
     try:
-        author = Author.objects.get(pk=author_id)
+        author = Author.objects.get(name=author_name), objects.filter(author=author)
     except Author.DoesNotExist:
         return []
     return author.books.all()
