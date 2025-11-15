@@ -9,8 +9,8 @@ urlpatterns = [
     path('libraries/<int:pk>/', views.LibraryBooksView.as_view(), name='library-detail'),
 
     # Book management (permission protected)
-    path('books/add/', views.add_book, name='book-add'),
-    path('books/<int:pk>/edit/', views.edit_book, name='book-edit'),
+    path('books/add_book/', views.add_book, name='book-add'),
+    path('books/<int:pk>/edit_book/', views.edit_book, name='book-edit'),
     path('books/<int:pk>/delete/', views.delete_book, name='book-delete'),
 
     # Authentication
