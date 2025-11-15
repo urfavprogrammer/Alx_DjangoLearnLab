@@ -4,7 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
-from django.contrib.auth.decorators import user_passes_test, permission_required
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import user_passes_test
 from django import forms
 
 from .models import Book
