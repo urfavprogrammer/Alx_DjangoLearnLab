@@ -84,7 +84,7 @@ class BookForm(forms.ModelForm):
         fields = ['title', 'author']
 
 
-@permission_required('relationship_app.can_add_book', raise_exception=True)
+@permission_required('relationship_app.can_create', raise_exception=True)
 def add_book(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
@@ -96,7 +96,7 @@ def add_book(request):
     return render(request, 'relationship_app/book_form.html', {'form': form, 'action': 'Add'})
 
 
-@permission_required('relationship_app.can_change_book', raise_exception=True)
+@permission_required('relationship_app.can_edit', raise_exception=True)
 def edit_book(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
@@ -109,7 +109,7 @@ def edit_book(request, pk):
     return render(request, 'relationship_app/book_form.html', {'form': form, 'action': 'Edit'})
 
 
-@permission_required('relationship_app.can_delete_book', raise_exception=True)
+@permission_required('relationship_app.can_delete', raise_exception=True)
 def delete_book(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
