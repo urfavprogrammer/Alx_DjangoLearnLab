@@ -82,6 +82,13 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS to all subdomains
 SECURE_HSTS_PRELOAD = True  # Allow inclusion in HSTS preload lists
 SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
 
+# Proxy SSL Header: Trust X-Forwarded-Proto from reverse proxy
+# Use this when running behind Nginx/Apache that handles HTTPS
+# The proxy adds X-Forwarded-Proto header to indicate original request was HTTPS
+# Django uses this to determine if request is secure for SECURE_SSL_REDIRECT and secure cookies
+# Format: (header_name, header_value) - typically ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Content Security Policy (CSP) Headers
 # This helps mitigate XSS attacks by controlling which domains can load content
 # If using django-csp, configure CSP_DEFAULT_SRC and other directives
