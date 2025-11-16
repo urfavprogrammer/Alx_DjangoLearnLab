@@ -129,4 +129,4 @@ LOGIN_REDIRECT_URL = '/relationship_app/books/'
 LOGOUT_REDIRECT_URL = '/relationship_app/login/'
 
 # Use custom user model
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = 'bookshelf.CustomUser'
