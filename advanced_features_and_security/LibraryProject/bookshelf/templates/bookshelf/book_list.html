@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .search-section {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        .search-form input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .search-form button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-form button:hover {
+            background-color: #0056b3;
+        }
+        .action-buttons {
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-right: 10px;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+        .btn-primary {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .no-books {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .info-box {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .security-note {
+            background-color: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Catalog</h1>
+
+    <!-- Information Box -->
+    <div class="info-box">
+        <strong>Note:</strong> The following actions require specific permissions:
+        <ul style="margin: 10px 0 0 20px;">
+            <li><strong>Add Book</strong> - Requires <code>bookshelf.can_create</code> permission</li>
+            <li><strong>Edit Book</strong> - Requires <code>bookshelf.can_edit</code> permission</li>
+            <li><strong>Delete Book</strong> - Requires <code>bookshelf.can_delete</code> permission</li>
+        </ul>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        {% if perms.bookshelf.can_create %}
+            <a href="{% url 'bookshelf:add-book' %}" class="btn btn-primary">+ Add New Book</a>
+        {% else %}
+            <button class="btn" disabled style="background-color: #ccc; cursor: not-allowed;">+ Add New Book (No Permission)</button>
+        {% endif %}
+    </div>
+
+    <!-- Search Section -->
+    <!-- 
+        CSRF Token Security in Search Forms:
+        The search form includes {% csrf_token %} because it submits via POST.
+        This protects against CSRF attacks.
+        
+        SQL Injection Prevention:
+        The search_query is passed to Django ORM which automatically parameterizes it.
+        Never use string formatting like: filter(title__contains=f"{query}")
+        Always use: filter(title__icontains=query)  # icontains auto-parameterizes
+    -->
+    <div class="search-section">
+        <form method="post" class="search-form">
+            {% csrf_token %}
+            {{ search_form.search_query }}
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <!-- Book List Table -->
+    {% if books %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Year</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.publication_year }}</td>
+                        <td>
+                            {% if perms.bookshelf.can_edit %}
+                                <a href="{% url 'bookshelf:edit-book' book.id %}" class="btn btn-warning">Edit</a>
+                            {% endif %}
+                            {% if perms.bookshelf.can_delete %}
+                                <a href="{% url 'bookshelf:delete-book' book.id %}" class="btn btn-danger">Delete</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="no-books">
+            <strong>No books found.</strong>
+            {% if search_query %}
+                No books match your search for "{{ search_query }}".
+            {% else %}
+                Click "Add New Book" to create one.
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Security Information -->
+    <div class="security-note">
+        <strong>Security Features on This Page:</strong>
+        <ul>
+            <li>✓ Search form includes CSRF token ({% csrf_token %})</li>
+            <li>✓ Search query uses parameterized ORM (SQL injection safe)</li>
+            <li>✓ User input auto-escaped in table (XSS safe)</li>
+            <li>✓ Edit/Delete buttons check permissions (view-level)</li>
+            <li>✓ All URLs are generated with {% url %} tag (safe)</li>
+        </ul>
+    </div>
+</body>
+</html>
