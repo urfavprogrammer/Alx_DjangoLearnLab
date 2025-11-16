@@ -24,10 +24,9 @@ class Book(models.Model):
     
     class Meta:
         permissions = (
-            ('can_view', 'Can view book'),
-            ('can_create', 'Can create book'),
-            ('can_edit', 'Can edit book'),
-            ('can_delete', 'Can delete book'),
+            ('can_add_book', 'Can add book (custom)'),
+            ('can_change_book', 'Can change book (custom)'),
+            ('can_delete_book', 'Can delete book (custom)'),
         )
 
 class Library(models.Model):
