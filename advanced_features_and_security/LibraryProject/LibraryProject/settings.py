@@ -20,12 +20,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# In production, load from environment variable
 SECRET_KEY = 'django-insecure-pnfm_&zari###z@g98i5g35u%)i16+!9kdz1u@2(a@265n$))_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Set to False in production to prevent information disclosure
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# Allow hosts from environment or configure for your domain
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com']
 
 
 # Application definition
@@ -38,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'relationship_app',
+    'bookshelf',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +52,53 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Note: django-csp can be added here for Content Security Policy:
+    # 'csp.middleware.CSPMiddleware',
+]
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+
+# CSRF Protection: Ensure CSRF tokens are required for state-changing requests
+# This is enabled by default via CsrfViewMiddleware, but ensure cookies are secure
+CSRF_COOKIE_SECURE = True  # Send CSRF cookie over HTTPS only
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript from accessing CSRF cookie
+CSRF_TRUSTED_ORIGINS = ['https://*.yourdomain.com']  # Add trusted origins for CSRF
+
+# Session Security: Ensure session cookies are sent over HTTPS only
+SESSION_COOKIE_SECURE = True  # Send session cookie over HTTPS only
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript from accessing session cookie
+SESSION_COOKIE_SAMESITE = 'Strict'  # Prevent CSRF via cookies
+
+# Browser Security Headers: Prevent common XSS and clickjacking attacks
+SECURE_BROWSER_XSS_FILTER = True  # Enable XSS filter in browsers (X-XSS-Protection)
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing (X-Content-Type-Options)
+X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking by disallowing framing (X-Frame-Options)
+
+# Additional Security Headers
+SECURE_HSTS_SECONDS = 31536000  # Force HTTPS for 1 year (Strict-Transport-Security)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS to all subdomains
+SECURE_HSTS_PRELOAD = True  # Allow inclusion in HSTS preload lists
+SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+
+# Content Security Policy (CSP) Headers
+# This helps mitigate XSS attacks by controlling which domains can load content
+# If using django-csp, configure CSP_DEFAULT_SRC and other directives
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'",)
+CSP_IMG_SRC = ("'self'", 'data:', 'https:')
+CSP_FONT_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
+
+# Password Security: Use strong password hashing
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',  # Preferred: Argon2
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',  # Fallback
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -126,3 +177,52 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Redirect after login/logout
 LOGIN_REDIRECT_URL = '/relationship_app/books/'
 LOGOUT_REDIRECT_URL = '/relationship_app/login/'
+
+# ============================================================================
+# SECURITY CHECKLIST AND NOTES
+# ============================================================================
+# 
+# This configuration implements the following security measures:
+#
+# 1. DEBUG = False
+#    - Prevents disclosure of sensitive information in error pages
+#    - Set to True only during development
+#
+# 2. CSRF Protection
+#    - CsrfViewMiddleware is enabled (protects against Cross-Site Request Forgery)
+#    - All forms must include {% csrf_token %} tag
+#    - CSRF_COOKIE_SECURE and SESSION_COOKIE_SECURE ensure cookies travel over HTTPS only
+#
+# 3. XSS Protection (Cross-Site Scripting)
+#    - SECURE_BROWSER_XSS_FILTER enables X-XSS-Protection header
+#    - SECURE_CONTENT_TYPE_NOSNIFF prevents MIME type sniffing
+#    - Output should be auto-escaped in templates (default Django behavior)
+#    - Use the |safe filter only on trusted content
+#
+# 4. Clickjacking Protection
+#    - X_FRAME_OPTIONS = 'DENY' prevents embedding this site in iframes
+#    - XFrameOptionsMiddleware is enabled
+#
+# 5. SQL Injection Prevention
+#    - Always use Django ORM for queries (never string formatting with user input)
+#    - Use parameterized queries: Model.objects.filter(field=user_input)
+#    - Avoid raw() and raw SQL unless absolutely necessary
+#
+# 6. HTTPS/TLS
+#    - SECURE_SSL_REDIRECT forces HTTP to HTTPS
+#    - SECURE_HSTS_SECONDS enforces HSTS headers
+#    - SESSION_COOKIE_SECURE and CSRF_COOKIE_SECURE require HTTPS
+#
+# 7. Password Security
+#    - Argon2PasswordHasher (preferred) for strong hashing
+#    - Password validators enforce minimum length and complexity
+#
+# Production Deployment Reminders:
+# - Load SECRET_KEY from environment variable (os.environ.get('DJANGO_SECRET_KEY'))
+# - Update ALLOWED_HOSTS with your actual domain
+# - Use a web server (gunicorn, uWSGI) instead of Django's development server
+# - Use a production database (PostgreSQL, MySQL) instead of SQLite
+# - Enable HTTPS/TLS with a valid certificate
+# - Regularly update Django and all dependencies
+# - Perform security audits and penetration testing
+#
