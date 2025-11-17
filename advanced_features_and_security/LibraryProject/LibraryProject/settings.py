@@ -55,7 +55,7 @@ MIDDLEWARE = [
     # Note: django-csp can be added here for Content Security Policy:
     # 'csp.middleware.CSPMiddleware',
 ]
-
+AUTH_USER_MODEL = 'bookshelf.CustomUser'    
 # ============================================================================
 # SECURITY SETTINGS
 # ============================================================================
