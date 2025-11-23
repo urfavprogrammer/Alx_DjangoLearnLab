@@ -130,6 +130,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     # Keep default permission open; views can set more restrictive permissions as needed
     'DEFAULT_PERMISSION_CLASSES': [
