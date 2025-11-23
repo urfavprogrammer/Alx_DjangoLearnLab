@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'api',
 ]
 
@@ -123,3 +124,26 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django REST framework settings: enable TokenAuthentication by default
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # Keep default permission open; views can set more restrictive permissions as needed
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+
+# Notes on authentication & permissions
+# - Token auth support is enabled via `rest_framework.authtoken` in INSTALLED_APPS.
+# - The `TokenAuthentication` class allows clients to authenticate by sending an
+#   `Authorization: Token <key>` HTTP header with requests.
+# - Tokens can be created via the `obtain_auth_token` endpoint (added to
+#   `api/urls.py`), via the Django admin, or programmatically in the shell.
+# - By default the REST framework permission is `AllowAny` so views remain
+#   permissive unless they set `permission_classes` explicitly. Individual
+#   views (like `BookList` and `BookViewSet`) override permissions to enforce
+#   authentication or admin-only access.
