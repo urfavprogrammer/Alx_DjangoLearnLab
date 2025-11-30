@@ -66,7 +66,12 @@ class ListView(generics.ListAPIView):
     # - `DjangoFilterBackend` allows exact or field-based filters (e.g. ?author=1)
     # - `SearchFilter` supports text search via `?search=...` on specified fields
     # - `OrderingFilter` supports sorting via `?ordering=field` or `?ordering=-field`
-    filter_backends = [django_filters.DjangoFilterBackend, rest_filters.SearchFilter, rest_filters.OrderingFilter]
+    # If django-filter is available use DjangoFilterBackend, otherwise only
+    # enable search and ordering backends.
+    if django_filters is not None:
+        filter_backends = [django_filters.DjangoFilterBackend, rest_filters.SearchFilter, rest_filters.OrderingFilter]
+    else:
+        filter_backends = [rest_filters.SearchFilter, rest_filters.OrderingFilter]
 
     # Allow filtering by the following model fields. `author` filters by FK id.
     filterset_fields = ['author', 'publication_year', 'title']
