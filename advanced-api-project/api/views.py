@@ -3,6 +3,8 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+from rest_framework import filters as rest_filters
+from django_filters import rest_framework as django_filters
 from django.db import IntegrityError
 
 from .models import Author, Book
@@ -58,6 +60,23 @@ class ListView(generics.ListAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [permissions.AllowAny]
+
+    # Filtering, searching and ordering support
+    # - `DjangoFilterBackend` allows exact or field-based filters (e.g. ?author=1)
+    # - `SearchFilter` supports text search via `?search=...` on specified fields
+    # - `OrderingFilter` supports sorting via `?ordering=field` or `?ordering=-field`
+    filter_backends = [django_filters.DjangoFilterBackend, rest_filters.SearchFilter, rest_filters.OrderingFilter]
+
+    # Allow filtering by the following model fields. `author` filters by FK id.
+    filterset_fields = ['author', 'publication_year', 'title']
+
+    # Search over book `title` and the related author's `name`.
+    search_fields = ['title', 'author__name']
+
+    # Allow ordering by these fields; front-end can request `?ordering=title` or `?ordering=-publication_year`.
+    ordering_fields = ['title', 'publication_year', 'id']
+    ordering = ['title']
 
     def get_queryset(self):
         qs = super().get_queryset()

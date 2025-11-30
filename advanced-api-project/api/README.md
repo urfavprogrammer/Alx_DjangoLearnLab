@@ -95,3 +95,41 @@ If you want, I can:
 - Add `IsOwnerOrReadOnly` and an `owner` field to `Book` and wire it up.
 - Replace the simple `get_queryset()` filters with `django-filter` configuration.
 - Add tests demonstrating permission enforcement and create/update behavior.
+
+Filtering, Search & Ordering Examples
+------------------------------------
+The `ListView` supports the following query parameters once `django-filter`
+and DRF filter backends are enabled in the project:
+
+- Filter by exact fields:
+  - `GET /api/books/?author=1` — returns books whose `author` FK equals `1`.
+  - `GET /api/books/?publication_year=2020` — books published in 2020.
+  - `GET /api/books/?title=Python` — exact match filtering on `title` (useful for equality checks).
+
+- Search (text search across fields):
+  - `GET /api/books/?search=django` — performs a case-insensitive search across `title` and `author__name`.
+
+- Ordering (sort results):
+  - `GET /api/books/?ordering=title` — order by title ascending.
+  - `GET /api/books/?ordering=-publication_year` — order by publication_year descending.
+
+Combine parameters:
+  - `GET /api/books/?author=2&search=api&ordering=-publication_year`
+
+Notes:
+  - Ensure `django-filter` is installed and added to `INSTALLED_APPS` (`'django_filters'`).
+  - Enable DRF filter backends in `settings.py` for global behavior, or use the view-level
+    `filter_backends` as shown in `views.py`.
+  - Example settings snippet to add in `settings.py`:
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ),
+}
+```
+
+If you'd like, I can add `django-filter` to a `requirements.txt` and wire up a project-level configuration automatically.
