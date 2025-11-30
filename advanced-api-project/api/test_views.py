@@ -50,11 +50,13 @@ class BookAPITestCase(APITestCase):
 
     def test_create_book_authenticated(self):
         url = reverse('book-create')
-        self.client.force_authenticate(user=self.user)
+        # Use session-based login for tests
+        self.client.login(username='user1', password='pass')
         data = {'title': 'New Book', 'publication_year': 2022, 'author': self.author1.pk}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Book.objects.filter(title='New Book').exists())
+        self.client.logout()
 
     def test_update_book_requires_auth(self):
         url = reverse('book-update', kwargs={'pk': self.book1.pk})
@@ -64,12 +66,14 @@ class BookAPITestCase(APITestCase):
 
     def test_update_book_authenticated(self):
         url = reverse('book-update', kwargs={'pk': self.book1.pk})
-        self.client.force_authenticate(user=self.user)
+        # Use session-based login for tests
+        self.client.login(username='user1', password='pass')
         data = {'title': 'Changed Title'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.book1.refresh_from_db()
         self.assertEqual(self.book1.title, 'Changed Title')
+        self.client.logout()
 
     def test_delete_book_requires_auth(self):
         url = reverse('book-delete', kwargs={'pk': self.book2.pk})
@@ -78,11 +82,13 @@ class BookAPITestCase(APITestCase):
 
     def test_delete_book_authenticated(self):
         url = reverse('book-delete', kwargs={'pk': self.book2.pk})
-        self.client.force_authenticate(user=self.user)
+        # Use session-based login for tests
+        self.client.login(username='user1', password='pass')
         response = self.client.delete(url)
         # Many DRF destroy views return 204 No Content
         self.assertIn(response.status_code, (status.HTTP_204_NO_CONTENT, status.HTTP_200_OK))
         self.assertFalse(Book.objects.filter(pk=self.book2.pk).exists())
+        self.client.logout()
 
     def test_filter_by_author_and_year_and_title(self):
         url = reverse('book-list')
