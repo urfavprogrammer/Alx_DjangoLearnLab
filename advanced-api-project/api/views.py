@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, status
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from django.db import IntegrityError
@@ -38,13 +39,13 @@ Replace or extend any of the above behaviors as needed for your app.
 
 
 # Custom permission class: read-only for everyone, write access for staff users.
-class IsStaffOrReadOnly(permissions.BasePermission):
-    """Allow safe methods for any request, require staff for unsafe methods."""
+# class IsStaffOrReadOnly(BasePermission):
+    # """Allow safe methods for any request, require staff for unsafe methods."""
 
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return bool(request.user and request.user.is_staff)
+    # def has_permission(self, request, view):
+    #     if request.method in permissions.SAFE_METHODS:
+    #         return True
+    #     return bool(request.user and request.user.is_staff)
 
 
 class ListView(generics.ListAPIView):
@@ -57,7 +58,6 @@ class ListView(generics.ListAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -80,7 +80,6 @@ class DetailView(generics.RetrieveAPIView):
     """Retrieve a specific book by its ID."""
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
 
 
 class CreateView(generics.CreateAPIView):
@@ -94,7 +93,7 @@ class CreateView(generics.CreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     parser_classes = [JSONParser, FormParser, MultiPartParser]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -120,7 +119,7 @@ class UpdateView(generics.UpdateAPIView):
     serializer_class = BookSerializer
     parser_classes = [JSONParser, FormParser, MultiPartParser]
     # Restrict updates to authenticated users only (read-only for unauthenticated)
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -141,4 +140,4 @@ class DeleteView(generics.DestroyAPIView):
     # Only authenticated users may delete. If you want more granular
     # control (e.g. staff-only or owner-only), replace this with a custom
     # permission class.
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
