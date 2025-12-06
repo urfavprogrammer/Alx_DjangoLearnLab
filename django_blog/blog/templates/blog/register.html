@@ -1,0 +1,19 @@
+{% extends 'blog/index.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Register</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <p><a href="{% url 'login' %}">Already have an account? Login</a></p>
+</div>
+{% endblock %}

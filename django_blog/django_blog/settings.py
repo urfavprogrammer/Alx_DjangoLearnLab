@@ -55,7 +55,7 @@ ROOT_URLCONF = 'django_blog.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'blog' / 'templates'],
+        'DIRS': [BASE_DIR / 'blog' / 'templates' / 'blog'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'django_blog_db',
         'USER': 'postgres',
-        'PASSWORD': 'your_password_here',
+        'PASSWORD': 'Chief042',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -122,9 +122,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # During development, include the app static folder explicitly (optional).
-STATICFILES_DIRS = [BASE_DIR / 'blog' / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'blog/static/blog']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_URL = '/blog/login/'
+LOGOUT_REDIRECT_URL = '/blog/'
+LOGIN_REDIRECT_URL = '/blog/profile'
