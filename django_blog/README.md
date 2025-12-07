@@ -15,3 +15,9 @@ Login: /blog/lgoin, valid credentials: you access the profile page
 Logout: Click logout link: redirects to Home_page
 
 security: Access /profile/ unauthenticated: redirects to /blog/login/
+
+## Blog CRUD Features
+- List: /posts/ - View all posts
+- Create: Authenticated users only, auto-author assignment
+- Update/Delete: Author-only via test mixins
+- Templates use Bootstrap, forms auto-render with as_p
