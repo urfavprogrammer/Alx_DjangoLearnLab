@@ -21,3 +21,5 @@ security: Access /profile/ unauthenticated: redirects to /blog/login/
 - Create: Authenticated users only, auto-author assignment
 - Update/Delete: Author-only via test mixins
 - Templates use Bootstrap, forms auto-render with as_p
+
+Add section: “Comments: Auth users post on post detail (/posts//). Authors edit/delete via buttons. Min 10 chars validation. Uses related_name=‘comments’ for post.comments.all().”

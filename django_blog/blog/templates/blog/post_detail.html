@@ -6,6 +6,36 @@
         <p>{{ post.content }}</p>
         <small>By {{ post.author }} on {{ post.created_at }}</small>
     </div>
+    <!-- After post content -->
+<div class="comments-section mt-5">
+    <h4>Comments ({{ comments|length }})</h4>
+    {% for comment in comments %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="mb-1">{{ comment.content }}</p>
+            <small>By {{ comment.author.username }} on {{ comment.created_at|date:"M d, Y H:i" }}
+            {% if user == comment.author %}
+                <a href="{% url 'edit-comment' comment.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'delete-comment' comment.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            {% endif %}
+            </small>
+        </div>
+    </div>
+    {% empty %}
+    <p>No comments yet. Be the first!</p>
+    {% endfor %}
+    
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'add-comment' post.pk %}" class="mt-4">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+    {% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to comment.</p>
+    {% endif %}
+</div>
+
 {% endblock %}
 
 
