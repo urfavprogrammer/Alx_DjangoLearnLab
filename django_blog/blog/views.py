@@ -166,7 +166,7 @@ class SearchResultsView(ListView):
         context['query'] = self.request.GET.get('q', '')
         return context
 
-class TaggedPostsView(ListView):
+class PostByTagListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
     context_object_name = 'posts'
