@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from ..forms import RegisterForm
+from .forms import RegisterForm
 
 
 # Create your views here.
@@ -49,8 +49,8 @@ def user_logout(request):
 
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from ..models import Post
-from ..forms import PostForm
+from .models import Post
+from .forms import PostForm
 
 class PostListView(ListView):
     model = Post
