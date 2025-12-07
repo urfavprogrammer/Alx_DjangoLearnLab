@@ -1,4 +1,12 @@
 {% extends 'blog/index.html' %}
+<div class="search-section mb-4">
+    <form method="get">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search posts..." value="{{ request.GET.q }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+</div>
 {% block content %}
 <h2>All Posts</h2>
 <a href="{% url 'post-create' %}" class="btn btn-primary">New Post</a>
@@ -8,5 +16,10 @@
         <p>{{ post.content|truncatewords:20 }}</p>
         <small>By {{ post.author }} on {{ post.created_at }}</small>
     </div>
+    <div class="post-tags">
+    {% for tag in post.tags.all %}
+        <a href="{% url 'blog:tagged-posts' tag.slug %}" class="badge bg-secondary">{{ tag.name }}</a>
+    {% endfor %}
+</div>
 {% endfor %}
 {% endblock %}

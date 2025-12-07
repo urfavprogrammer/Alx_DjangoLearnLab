@@ -7,6 +7,14 @@
         <small>By {{ post.author }} on {{ post.created_at }}</small>
     </div>
     <!-- After post content -->
+     <div class="post-tags mt-3">
+    <strong>Tags:</strong>
+    {% for tag in post.tags.all %}
+        <a href="{% url 'blog:tagged-posts' tag.slug %}" class="badge bg-primary me-1">{{ tag.name }}</a>
+    {% empty %}
+        <span class="text-muted">No tags</span>
+    {% endfor %}
+</div>
 <div class="comments-section mt-5">
     <h4>Comments ({{ comments|length }})</h4>
     {% for comment in comments %}

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Post, Comment
+from taggit.forms import TagField
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -11,9 +12,10 @@ class RegisterForm(UserCreationForm):
         fields = ["username", "email", "password1", "password2"]
     
 class PostForm(forms.ModelForm):
+    tags = TagField()
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'tags']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
