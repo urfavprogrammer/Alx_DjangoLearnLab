@@ -1,12 +1,12 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
-from rest_framework.authtoken.models import Tokens
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from .serializers import RegisterSerializer, UserSerializer
+from .serializers import RegisterSerializer, UserSerializer, LoginSerializer
 
 User = get_user_model()
 
@@ -19,17 +19,19 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        user = authenticate(request, username=username, password=password)
-        if not user:
-            return Response(
-                {'detail': 'Invalid credentials'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            user = authenticate(request, username=username, password=password)
+            if not user:
+                return Response(
+                    {'detail': 'Invalid credentials'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class MeView(APIView):
     permission_classes = [IsAuthenticated]

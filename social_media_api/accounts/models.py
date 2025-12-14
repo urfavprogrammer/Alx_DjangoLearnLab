@@ -8,11 +8,6 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
-
 class User(AbstractUser):
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True)
