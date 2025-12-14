@@ -4,7 +4,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 
@@ -34,12 +33,10 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Post.objects.select_related('author').prefetch_related('comments__author')
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def feed(self, request):
         following_users = request.user.following.all()
-        feed_posts = Post.objects.filter(
-            author__in=following_users
-        ).select_related('author').prefetch_related('comments__author').order_by('-created_at')
+        feed_posts = Post.objects.filter(author__in=following_users).order_by('-created_at').select_related('author').prefetch_related('comments__author')
         
         # Apply pagination
         page = self.paginate_queryset(feed_posts)
