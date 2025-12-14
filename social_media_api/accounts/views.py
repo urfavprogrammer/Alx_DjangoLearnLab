@@ -36,3 +36,36 @@ class MeView(APIView):
     def get(self, request, *args, **kwargs):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+    
+
+class UserViewSet(viewsets.ReadOnlyModelViewSets):
+    queryset = User.Objects.all()
+    serializer_class = UserSerializer
+    permission_class = [IsAuthenticated]
+
+    @action(detail = True, methods=['post'])
+    def follow(self, request, pk=None):
+        user_to_follow == request.user
+        if user_to_follow == request.user:
+            return Response({'error': 'Cannot Follow Yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.following.add(user_to_follow)
+        return Response({'message': f'Now following {user_to_follow.username}'}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def unfollow(self, request, pk=None):
+        user_to_unfollow = self.get_object()
+        request.user.following.remove(user_to_unfollow)
+        return Response({'message': f'Unfollowed {user_to_unfollow.username}'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def following(self, request):
+        following_users = request.user.following.all()
+        serializer = self.get_serializer(following_users, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def followers(self, request):
+        followers = request.user.followers.all()
+        serializer = self.get_serializer(followers, many=True)
+        return Response(serializer.data)
+    

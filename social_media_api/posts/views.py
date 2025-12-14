@@ -32,6 +32,22 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Post.objects.select_related('author').prefetch_related('comments__author')
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def feed(self, request):
+        following_users = request.user.following.all()
+        feed_posts = Post.objects.filter(
+            author__in=following_users
+        ).select_related('author').prefetch_related('comments__author').order_by('-created_at')
+        
+        # Apply pagination
+        page = self.paginate_queryset(feed_posts)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(feed_posts, many=True)
+        return Response(serializer.data)
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
