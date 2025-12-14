@@ -7,5 +7,6 @@ router.register(r'posts', PostViewSet)
 router.register(r'posts/(?P<post_pk>\d+)/comments', CommentViewSet)
 
 urlpatterns = [
+    path('feed/', include(router.urls)),
     path('', include(router.urls)),
 ]
