@@ -87,7 +87,7 @@ class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = django_shortcuts.get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             return Response({'detail': 'You have already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -109,8 +109,8 @@ class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        post = django_shortcuts.get_object_or_404(Post, pk=pk)
-        like = django_shortcuts.get_object_or_404(Like, user=request.user, post=post)
+        post = generics.get_object_or_404(Post, pk=pk)
+        like = generics.get_object_or_404(Like, user=request.user, post=post)
         like.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
