@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django import shortcuts as generics
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from notifications.models import Notification
@@ -52,7 +52,7 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             return Response({'detail': 'You have already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -71,8 +71,8 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
-        like = get_object_or_404(Like, user=request.user, post=post)
+        post = generics.get_object_or_404(Post, pk=pk)
+        like = generics.get_object_or_404(Like, user=request.user, post=post)
         like.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
