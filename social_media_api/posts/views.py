@@ -46,6 +46,42 @@ class PostViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(feed_posts, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        if like.objects.filter(user=request.user, post=post).exists():
+            return Response({'detail': 'You have already liked this post.'}, status=400)
+        
+        like = Like.objects.create(user=request.user, post=post)
+
+        #Create notification
+        Notification.objects.create(
+            recipient=post.author,
+            actor = request.user,
+            verb= 'liked',
+            target_content_type=ContentType.objects.get_for_model(post),
+            target_object_id=post.pk
+        )
+
+        serializer = LikeSerializer(like)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
+        post = self.get_object()
+        like = Like.objects.filter(user=request.user, post=post).first()
+        if not like:
+            return Response({'detail': 'You have not liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
+        like.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=['get'])
+    def like_count(self,request,pk=None):
+        post = self.get_object()
+        count = post.likes.count()
+        return Response({'like_count': count})
+    
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
@@ -62,3 +98,4 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         post = Post.objects.get(id=self.kwargs.get('post_pk'))
         serializer.save(author=self.request.user, post=post)
+
