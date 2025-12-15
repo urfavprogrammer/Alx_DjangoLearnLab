@@ -1,11 +1,14 @@
-from rest_framework import viewsets, filters, permissions
+from rest_framework import viewsets, filters, permissions, status
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from django.shortcuts import get_object_or_404
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -49,17 +52,16 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = self.get_object()
-        if like.objects.filter(user=request.user, post=post).exists():
-            return Response({'detail': 'You have already liked this post.'}, status=400)
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            return Response({'detail': 'You have already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        like = Like.objects.create(user=request.user, post=post)
-
-        #Create notification
+        # Create notification
         Notification.objects.create(
             recipient=post.author,
-            actor = request.user,
-            verb= 'liked',
+            actor=request.user,
+            verb='liked',
             target_content_type=ContentType.objects.get_for_model(post),
             target_object_id=post.pk
         )
@@ -69,10 +71,8 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = self.get_object()
-        like = Like.objects.filter(user=request.user, post=post).first()
-        if not like:
-            return Response({'detail': 'You have not liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
+        post = get_object_or_404(Post, pk=pk)
+        like = get_object_or_404(Like, user=request.user, post=post)
         like.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
