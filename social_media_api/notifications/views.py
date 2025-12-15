@@ -6,6 +6,7 @@ from .models import Notification
 from .serializers import NotificationSerializer
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Notification.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = NotificationSerializer
 
