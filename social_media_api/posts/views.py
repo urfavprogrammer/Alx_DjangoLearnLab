@@ -1,10 +1,10 @@
-from rest_framework import viewsets, filters, permissions, status
+from rest_framework import viewsets, filters, permissions, status, generics
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django import shortcuts as generics
+from django import shortcuts as django_shortcuts
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from notifications.models import Notification
@@ -52,7 +52,7 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = generics.get_object_or_404(Post, pk=pk)
+        post = django_shortcuts.get_object_or_404(Post, pk=pk)
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             return Response({'detail': 'You have already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -71,8 +71,8 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = generics.get_object_or_404(Post, pk=pk)
-        like = generics.get_object_or_404(Like, user=request.user, post=post)
+        post = django_shortcuts.get_object_or_404(Post, pk=pk)
+        like = django_shortcuts.get_object_or_404(Like, user=request.user, post=post)
         like.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -82,6 +82,38 @@ class PostViewSet(viewsets.ModelViewSet):
         count = post.likes.count()
         return Response({'like_count': count})
     
+
+class LikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = django_shortcuts.get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            return Response({'detail': 'You have already liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create notification
+        Notification.objects.create(
+            recipient=post.author,
+            actor=request.user,
+            verb='liked',
+            target_content_type=ContentType.objects.get_for_model(post),
+            target_object_id=post.pk
+        )
+
+        serializer = LikeSerializer(like)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UnlikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = django_shortcuts.get_object_or_404(Post, pk=pk)
+        like = django_shortcuts.get_object_or_404(Like, user=request.user, post=post)
+        like.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
